@@ -1,0 +1,94 @@
+(function() {
+	'use strict';
+	const wait = async(millis)=>(new Promise(resolve=>setTimeout(resolve,millis)));
+	const debounce = (func, delay=100)=>{
+		let to;
+		return (...args) => {
+			if (to) clearTimeout(to);
+			to = setTimeout(()=>func.apply(this, args), delay);
+		};
+	}
+
+	let videoEl;
+
+	const replaceBg = async(muts=[])=>{
+		console.log('[STVBG]', 'replaceBg', muts);
+		const el = document.querySelector('#bg1');
+		const url = window.getComputedStyle(el).background.replace(/^.*url\(['"]?([^'"\)]+)['"]\).*$/, '$1');
+		console.log('[STVBG]', url);
+		if (url.match(/^.+\.[a-z0-z]+\.[a-z0-9]+$/i)) {
+			const vurl = url.replace(/^(.+\.[a-z0-z]+)\.[a-z0-9]+$/i, '$1');
+			console.log('[STVBG]', vurl);
+			const resp = await fetch(url, {
+				method: 'HEAD',
+			});
+			console.log('[STVBG]', resp);
+			if (resp.ok) {
+				if (!videoEl) {
+					const v = document.createElement('video'); {
+						v.loop = 1;
+						v.autoplay = 1;
+						v.muted = 1;
+						v.style.position = 'absolute';
+						v.style.height = '100%';
+						v.style.width = '100%';
+						v.style.objectFit = 'cover';
+					}
+					videoEl = v;
+				}
+				videoEl.src = vurl;
+				el.append(videoEl);
+				while (true) {
+					try {
+						await videoEl.play();
+						break;
+					} catch(ex) {
+						await wait(100);
+					}
+				}
+
+			}
+		} else if (videoEl) {
+			videoEl.remove();
+		}
+	};
+	replaceBg();
+
+	const mo = new MutationObserver(debounce(replaceBg));
+	mo.observe(document.querySelector('#bg1'), {attributes:true});
+})();
+
+$(document).ready(function () {
+	const addSettings = () => {
+		const html = `
+		<div class="vbg--settings">
+			<div class="inline-drawer">
+				<div class="inline-drawer-toggle inline-drawer-header">
+					<b>Video Backgrounds</b>
+					<div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+				</div>
+				<div class="inline-drawer-content" style="font-size:small;">
+					<h2>How To Use</h2>
+					<ol style="padding-left: 1.5em;">
+						<li>
+							Use your file explorer to place the video file you want to use into SillyTavern's backgrounds folder:
+							<pre>.../SillyTavern/public/backgrounds/</pre>
+						</li>
+						<li>
+							Place any image file with the exact same name (including the video's filename extension) plus the image files extension into the backgrounds folder.<br>
+							Example:<br>
+							video file: <code>MyVideo.mp4</code><br>
+							image file: <code>MyVideo.mp4.jpg</code><br>&nbsp;
+						</li>
+						<li>
+							Start / reload SillyTavern and select the image file as your background.
+						</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		`;
+		$('#extensions_settings').append(html);
+	};
+	addSettings();
+});
