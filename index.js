@@ -13,8 +13,19 @@
 
 	const replaceBg = async(muts=[])=>{
 		console.log('[STVBG]', 'replaceBg', muts);
+		await wait(1000);
 		const el = document.querySelector('#bg1');
-		const url = window.getComputedStyle(el).background.replace(/^.*url\(['"]?([^'"\)]+)['"]\).*$/, '$1');
+		const customEl = document.querySelector('#bg_custom');
+		const bg = window.getComputedStyle(el).background;
+		const bgUrl = bg.replace(/^.*?url\(['"]?([^'"\)]+)['"]\).*?$/, '$1');
+		const customBg = window.getComputedStyle(customEl).background
+		const customUrl = customBg.replace(/^.*?url\(['"]?([^'"\)]+)['"]\).*?$/, '$1');
+		let url;
+		if (customUrl && customUrl != customBg) {
+			url = customUrl;
+		} else if (bgUrl && bgUrl != bg) {
+			url = bgUrl;
+		}
 		console.log('[STVBG]', url);
 		if (url.match(/^.+\.[a-z0-z]+\.[a-z0-9]+$/i)) {
 			const vurl = url.replace(/^(.+\.[a-z0-z]+)\.[a-z0-9]+$/i, '$1');
@@ -26,9 +37,9 @@
 			if (resp.ok) {
 				if (!videoEl) {
 					const v = document.createElement('video'); {
-						v.loop = 1;
-						v.autoplay = 1;
-						v.muted = 1;
+						v.loop = true;
+						v.autoplay = true;
+						v.muted = true;
 						v.style.position = 'absolute';
 						v.style.height = '100%';
 						v.style.width = '100%';
@@ -37,7 +48,7 @@
 					videoEl = v;
 				}
 				videoEl.src = vurl;
-				el.append(videoEl);
+				(customEl ?? el).append(videoEl);
 				while (true) {
 					try {
 						await videoEl.play();
@@ -56,6 +67,7 @@
 
 	const mo = new MutationObserver(debounce(replaceBg));
 	mo.observe(document.querySelector('#bg1'), {attributes:true});
+	mo.observe(document.querySelector('#bg_custom'), {attributes:true});
 })();
 
 $(document).ready(function () {
