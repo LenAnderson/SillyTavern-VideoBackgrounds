@@ -54,7 +54,7 @@ import { delay } from "../../../utils.js";
                 v.style.opacity = '1';
                 while (true) {
                     try {
-                        await videoEl.play();
+                        await v.play();
                         break;
                     } catch(ex) {
                         await wait(100);
