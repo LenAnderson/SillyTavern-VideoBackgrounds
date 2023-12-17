@@ -13,6 +13,8 @@ import { delay } from "../../../utils.js";
 
     let videoEl;
 
+    Array.from(document.querySelectorAll('#bg1, #bg_custom')).forEach(it=>it.style.backgroundPosition = 'center');
+
     const replaceBg = async(muts = [])=>{
         console.log('[STVBG]', 'replaceBg', muts);
         await wait(1000);
