@@ -120,9 +120,9 @@ import { delay } from '../../../utils.js';
             resolve();
         });
     };
-    replaceThumbs();
     let rtq = 0;
     let rtp = Promise.resolve();
+    replaceThumbs();
     const queueReplaceThumbs = async()=>{
         rtq++;
         await rtp;
