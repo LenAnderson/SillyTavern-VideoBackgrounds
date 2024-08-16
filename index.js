@@ -34,7 +34,7 @@ import { delay } from '../../../utils.js';
         if (url.match(/^.+\.[a-z0-z]+\.[a-z0-9]+$/i)) {
             const vurl = url.replace(/^(.+\.[a-z0-z]+)\.[a-z0-9]+$/i, '$1');
             console.log('[STVBG]', vurl);
-            const resp = await fetch(url, {
+            const resp = await fetch(vurl, {
                 method: 'HEAD',
             });
             console.log('[STVBG]', resp);
