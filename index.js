@@ -76,6 +76,60 @@ import { delay } from '../../../utils.js';
     const mo = new MutationObserver(debounce(replaceBg));
     mo.observe(document.querySelector('#bg1'), { attributes:true });
     mo.observe(document.querySelector('#bg_custom'), { attributes:true });
+
+    const replaceThumbs = async(muts = [])=>{
+        rtp = new Promise(async(resolve)=>{
+            for (const bg of [...document.querySelectorAll('#bg_menu_content .bg_example[bgfile]:not(.stvbg)')]) {
+                bg.classList.add('stvbg');
+                const url = bg.getAttribute('bgfile');
+                if (url.match(/^.+\.[a-z0-z]+\.[a-z0-9]+$/i)) {
+                    const vurl = `/backgrounds/${url.replace(/^(.+\.[a-z0-z]+)\.[a-z0-9]+$/i, '$1')}`;
+                    console.log('[STVBG]', vurl);
+                    const resp = await fetch(vurl, {
+                        method: 'HEAD',
+                    });
+                    console.log('[STVBG]', resp);
+                    if (resp.ok) {
+                        const v = document.createElement('video'); {
+                            v.loop = true;
+                            // v.autoplay = true;
+                            v.muted = true;
+                            v.style.position = 'absolute';
+                            v.style.height = '100%';
+                            v.style.width = '100%';
+                            v.style.objectFit = 'cover';
+                            v.style.zIndex = '-1';
+                            v.src = vurl;
+                        }
+                        bg.style.background = 'none';
+                        bg.addEventListener('pointerover', ()=>v.play());
+                        bg.addEventListener('pointerout', ()=>v.pause());
+                        bg.append(v);
+                        // await delay(20);
+                        // while (true) {
+                        //     try {
+                        //         await v.play();
+                        //         break;
+                        //     } catch(ex) {
+                        //         await wait(100);
+                        //     }
+                        // }
+                    }
+                }
+            }
+            resolve();
+        });
+    };
+    replaceThumbs();
+    let rtq = 0;
+    let rtp = Promise.resolve();
+    const queueReplaceThumbs = async()=>{
+        rtq++;
+        await rtp;
+        if (--rtq == 0) replaceThumbs();
+    };
+    const moThumbs = new MutationObserver(debounce(queueReplaceThumbs));
+    moThumbs.observe(document.querySelector('#bg_menu_content'), { childList:true, subtree:true });
 })();
 
 $(document).ready(function () {
