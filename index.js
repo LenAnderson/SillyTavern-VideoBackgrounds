@@ -13,21 +13,16 @@ import { delay } from '../../../utils.js';
 
     let videoEl;
 
-    Array.from(document.querySelectorAll('#bg1, #bg_custom')).forEach(it=>it.style.backgroundPosition = 'center');
+    /**@type {HTMLElement[]}*/([...document.querySelectorAll('#bg1')]).forEach(it=>it.style.backgroundPosition = 'center');
 
     const replaceBg = async(muts = [])=>{
         console.log('[STVBG]', 'replaceBg', muts);
         await wait(1000);
         const el = document.querySelector('#bg1');
-        const customEl = document.querySelector('#bg_custom');
         const bg = window.getComputedStyle(el).background;
-        const bgUrl = bg.replace(/^.*?url\(['"]?([^'"\)]+)['"]\).*?$/, '$1');
-        const customBg = window.getComputedStyle(customEl).background;
-        const customUrl = customBg.replace(/^.*?url\(['"]?([^'"\)]+)['"]\).*?$/, '$1');
+        const bgUrl = bg.replace(/^.*?url\(['"]?([^'")]+)['"]\).*?$/, '$1');
         let url;
-        if (customUrl && customUrl != customBg) {
-            url = customUrl;
-        } else if (bgUrl && bgUrl != bg) {
+        if (bgUrl && bgUrl != bg) {
             url = bgUrl;
         }
         console.log('[STVBG]', url);
@@ -51,7 +46,7 @@ import { delay } from '../../../utils.js';
                     v.style.transition = '400ms linear';
                     v.src = vurl;
                 }
-                (customEl ?? el).append(v);
+                el.append(v);
                 await delay(20);
                 v.style.opacity = '1';
                 while (true) {
@@ -75,11 +70,10 @@ import { delay } from '../../../utils.js';
 
     const mo = new MutationObserver(debounce(replaceBg));
     mo.observe(document.querySelector('#bg1'), { attributes:true });
-    mo.observe(document.querySelector('#bg_custom'), { attributes:true });
 
     const replaceThumbs = async(muts = [])=>{
         rtp = new Promise(async(resolve)=>{
-            for (const bg of [...document.querySelectorAll('#bg_menu_content .bg_example[bgfile]:not(.stvbg)')]) {
+            for (const bg of /**@type {HTMLElement[]}*/([...document.querySelectorAll('#bg_menu_content .bg_example[bgfile]:not(.stvbg)')])) {
                 bg.classList.add('stvbg');
                 const url = bg.getAttribute('bgfile');
                 if (url.match(/^.+\.[a-z0-z]+\.[a-z0-9]+$/i)) {
@@ -98,22 +92,14 @@ import { delay } from '../../../utils.js';
                             v.style.height = '100%';
                             v.style.width = '100%';
                             v.style.objectFit = 'cover';
-                            v.style.zIndex = '-1';
+                            v.style.zIndex = '0';
                             v.src = vurl;
                         }
+                        /**@type {HTMLElement}*/(bg.querySelector('.BGSampleTitle')).style.zIndex = '1';
                         bg.style.background = 'none';
                         bg.addEventListener('pointerover', ()=>v.play());
                         bg.addEventListener('pointerout', ()=>v.pause());
                         bg.append(v);
-                        // await delay(20);
-                        // while (true) {
-                        //     try {
-                        //         await v.play();
-                        //         break;
-                        //     } catch(ex) {
-                        //         await wait(100);
-                        //     }
-                        // }
                     }
                 }
             }
